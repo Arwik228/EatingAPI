@@ -1,0 +1,543 @@
+---
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Eat app api"
+host: "127.0.0.1:8080"
+basePath: "/"
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /api/emailActive/{smail}:
+    get:
+      description: "Email Active"
+      operationId: "emailActiveGet"
+      parameters:
+      - name: "smail"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Status"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "userController"
+  /api/emailStatus/{email}:
+    get:
+      description: "Get status email"
+      operationId: "apiEmailStatusGET"
+      parameters:
+      - name: "email"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+          schema:
+            type: "object"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "userController"
+  /api/emailAuth:
+    put:
+      description: "Auth account"
+      operationId: "apiEmailAuthPUT"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Main module for the new element"
+        required: true
+        schema:
+          $ref: "#/definitions/Authorization"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "userController"
+  /api/createAccount:
+    post:
+      description: "Add all information or validation"
+      operationId: "apiCreateAccountPOST"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Main module for the new element"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateNewUser"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "userController"
+  /api/getUserData/{token}:
+    get:
+      description: "Get all user data"
+      operationId: "apiGetUserDataTokenGET"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "userController"
+  /api/UpdateData/{token}:
+    put:
+      description: "Update user data"
+      operationId: "apiUpdateDataTokenPUT"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Main module for the new element"
+        required: true
+        schema:
+          $ref: "#/definitions/UpdateDate"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "userController"
+  /api/createShops/{token}:
+    post:
+      description: "Create shops"
+      operationId: "apiCreateShopsTokenPOST"
+      consumes:
+      - "multipart/form-data"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "image"
+        in: "formData"
+        description: "The file to upload."
+        required: false
+        type: "file"
+      - name: "nameShop"
+        in: "formData"
+        description: "nameShop"
+        required: false
+        type: "string"
+      - name: "information"
+        in: "formData"
+        description: "information"
+        required: false
+        type: "string"
+      - name: "category"
+        in: "formData"
+        description: "category"
+        required: false
+        type: "string"
+      - name: "double"
+        in: "formData"
+        description: "double"
+        required: false
+        type: "string"
+      - name: "edit"
+        in: "formData"
+        description: "edit"
+        required: false
+        type: "boolean"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "shopController"
+  /api/getShops/{token}/{startId}/{amount}:
+    get:
+      description: "Get all user data"
+      operationId: "apiGetShopsTokenStartIdAmountGET"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "startId"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "amount"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "shopController"
+  /api/createProduct/{token}:
+    post:
+      description: "Get all user data"
+      operationId: "apiCreateProductTokenPOST"
+      consumes:
+      - "multipart/form-data"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "nameProduct"
+        in: "formData"
+        description: "nameProduct"
+        required: false
+        type: "string"
+      - name: "information"
+        in: "formData"
+        description: "information"
+        required: false
+        type: "string"
+      - name: "category"
+        in: "formData"
+        description: "category"
+        required: false
+        type: "string"
+      - name: "price"
+        in: "formData"
+        description: "price"
+        required: false
+        type: "string"
+      - name: "double"
+        in: "formData"
+        description: "double"
+        required: false
+        type: "string"
+      - name: "store"
+        in: "formData"
+        description: "store"
+        required: false
+        type: "string"
+      - name: "image_1"
+        in: "formData"
+        description: "image_1"
+        required: false
+        type: "file"
+      - name: "image_2"
+        in: "formData"
+        description: "image_2"
+        required: false
+        type: "file"
+      - name: "image_3"
+        in: "formData"
+        description: "image_3"
+        required: false
+        type: "file"
+      - name: "edit"
+        in: "formData"
+        description: "edit"
+        required: false
+        type: "boolean"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "productController"
+  /api/getProduct/{token}/{startId}/{amount}:
+    get:
+      description: "Get all user data"
+      operationId: "apiGetProductTokenStartIdAmountGET"
+      parameters:
+      - name: "token"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "startId"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "amount"
+        in: "path"
+        description: "Main module for the new element"
+        required: true
+        type: "string"
+      - name: "word"
+        in: "query"
+        description: "Main module for the new element"
+        required: false
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "productController"
+  /api/setCommentProduct/{token}:
+    post:
+      description: "Set product rating"
+      operationId: "createCommentPOST"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CreateComment"
+      responses:
+        '400':
+          description: Bad request. User ID must be an integer and larger than 0.
+        "200":
+          description: "Status"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "commentController"
+  /api/getRatingProduct/{token}/{product}:
+    get:
+      description: "Get product rating"
+      operationId: "ratingProductGET"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "product"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Status"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "productController"
+  /api/setRatingProduct/{token}:
+    post:
+      description: "Set product rating"
+      operationId: "ratingProductPOST"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/SetRating"
+      responses:
+        "200":
+          description: "Status"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "productController"
+  /api/getComment/{token}/{startId}/{amount}/{product}:
+    get:
+      description: "Get comment  data"
+      operationId: "commentProductGET"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "startId"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "amount"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "product"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "commentController"
+  /api/deleteComment/{token}/{id}:
+    delete:
+      description: "delete comment data"
+      operationId: "commentProductDELETE"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "commentController"
+  /api/deleteProduct/{token}/{id}/{double}:
+    delete:
+      description: "delete product data"
+      operationId: "productDELETE"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "double"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "productController"
+  /api/deleteShop/{token}/{id}/{double}:
+    delete:
+      description: "delete shop data"
+      operationId: "shopDELETE"
+      parameters:
+      - name: "token"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+      - name: "double"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Return object data"
+        "404":
+          description: "Element not found"
+      x-swagger-router-controller: "shopController"
+definitions:
+  CreateNewUser:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+        description: "email"
+      number:
+        type: "string"
+        description: "lastname"
+      firstname:
+        type: "string"
+        description: "firstname"
+      lastname:
+        type: "string"
+        description: "lastname"
+      password:
+        type: "string"
+        description: "password"
+    example:
+      number: "number"
+      password: "password"
+      firstname: "firstname"
+      email: "email"
+      lastname: "lastname"
+  Authorization:
+    type: "object"
+    properties:
+      email:
+        type: "string"
+        description: "email"
+      password:
+        type: "string"
+        description: "password"
+      device:
+        type: "string"
+        description: "device"
+      platforma:
+        type: "string"
+        description: "platforma"
+      ip:
+        type: "string"
+        description: "ip"
+    example:
+      platforma: "platforma"
+      password: "password"
+      ip: "ip"
+      device: "device"
+      email: "email"
+  UpdateDate:
+    type: "object"
+    properties:
+      number:
+        type: "string"
+        description: "number"
+      firstname:
+        type: "string"
+        description: "firstname"
+      lastname:
+        type: "string"
+        description: "lastname"
+      password:
+        type: "string"
+        description: "password"
+    example:
+      number: "number"
+      password: "password"
+      firstname: "firstname"
+      lastname: "lastname"
+  SetRating:
+    type: "object"
+    properties:
+      product:
+        type: "string"
+        description: "product"
+      rating:
+        type: "string"
+        description: "rating"
+    example:
+      product: "product"
+      rating: "rating"
+  CreateComment:
+    type: "object"
+    properties:
+      product:
+        type: "integer"
+        description: "product"
+      content:
+        type: "string"
+        description: "content"
+    example:
+      product: "product"
+      content: "content"
+responses:
+  ElementNotFound:
+    description: "Element not found"
+  DefaultResponse:
+    description: "Return object data"
