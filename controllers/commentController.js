@@ -16,11 +16,10 @@ module.exports.commentProductDELETE = function commentProductDELETE(req, res, ne
 };
 
 module.exports.commentProductGET = function commentProductGET(req, res, next) {
-    var token = req.swagger.params['token'].value;
     var startId = req.swagger.params['startId'].value;
     var amount = req.swagger.params['amount'].value;
     var product = req.swagger.params['product'].value;
-    Comment.commentProductGET(token, startId, amount, product)
+    Comment.commentProductGET(startId, amount, product)
         .then(function (response) {
             utils.writeJson(res, response);
         })

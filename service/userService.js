@@ -1,8 +1,9 @@
-const { users, store, auth } = require('../database/db');
-const { createAccount } = require('./mail/mail');
+const { userTable, storeTable, authTable } = require('../database/db');
+const { createAccount, resetPassword } = require('../mail/confirm');
+const { fn } = require("sequelize");
 const crypto = require('crypto');
 
-exports.apiCreateAccountPOST = async function (body) {
+exports.createAccountPOST = async function (body) {
     if (!RegExp(/^([\w.*-]+@([\w-]+\.)+[\w-]{2,4})?$/).test(body.email)) {
         return ({ response: { status: "error", info: "No valid email." } });
     }
@@ -18,13 +19,13 @@ exports.apiCreateAccountPOST = async function (body) {
     if (body.lastname.length && body.lastname.length > 20) {
         return ({ response: { status: "error", info: "Please send correct lastname." } });
     }
-    if (await users.count({ where: { email: body.email } })) {
+    if (await userTable.count({ where: { email: body.email } })) {
         return ({ response: { status: "error", info: "This email yet registration." } });
     }
     let double = String(Math.random()).split('.')[1].slice(0, 10);
     let token = crypto.pbkdf2Sync(body.email + Date.now() + Math.random(), 'salt', 100000, 64, 'sha512').toString('hex');
     let smail = crypto.pbkdf2Sync(body.email, 'salt', 100000, 64, 'sha512').toString('hex')
-    let request = await users.create({
+    let confirmCreateAccount = await userTable.create({
         double, token, smail,
         email: body.email,
         number: body.number.replace('+', ''),
@@ -33,32 +34,51 @@ exports.apiCreateAccountPOST = async function (body) {
         hash: crypto.pbkdf2Sync(body.password, 'salt', 100000, 64, 'sha512').toString('hex')
     });
     createAccount(body.email, smail);
-    console.warn(`Activate account: http://127.0.0.1:8080/api/emailActive/${smail}`);
-    if (request) {
+    if (confirmCreateAccount) {
         return ({ response: { status: "ok", info: "Create new account.", access: { token, double } } });
     }
 }
 
-exports.apiEmailAuthPUT = async function (body) {
-    let request = await users.findOne({ where: { email: body.email } });
-    if (request) {
+exports.emailAuthPUT = async function (body) {
+    let thisAccountIsExist = await userTable.findOne({ where: { email: body.email } });
+    if (thisAccountIsExist) {
         let newHash = crypto.pbkdf2Sync(body.password, 'salt', 100000, 64, 'sha512').toString('hex');
-        if (request.dataValues.hash === newHash) {
+        if (thisAccountIsExist.dataValues.hash === newHash) {
             let double = String(Math.random()).split('.')[1].slice(0, 10);
-            let token = crypto.pbkdf2Sync(request.dataValues.email + Date.now() + Math.random(), 'salt', 100000, 64, 'sha512').toString('hex');
-            authInformation({ double, user: request.id, platforma: body.platforma, device: body.device, ip: body.ip });
-            request.token = token;
-            request.double = double;
-            request.save();
+            let token = crypto.pbkdf2Sync(thisAccountIsExist.dataValues.email + Date.now() + Math.random(), 'salt', 100000, 64, 'sha512').toString('hex');
+            authInformation({ double, user: thisAccountIsExist.id, platforma: body.platforma, device: body.device, ip: body.ip });
+            thisAccountIsExist.token = token;
+            thisAccountIsExist.double = double;
+            thisAccountIsExist.save();
             return ({ response: { status: "ok", info: "You auth.", access: { token, double } } });
+        } else {
+            return ({ response: { status: "ok", info: "Bad password." } });
         }
     }
     return ({ response: { status: "error", info: "No valid data." } });
 }
 
-exports.apiEmailStatusGET = async function (email) {
+exports.resetPasswordGET = async function (email) {
+    let user = await userTable.findOne({ where: { email } });
+    if (user) {
+        let createNewUserPassword = "";
+        var symbols = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!%?*()_+=";
+        for (var i = 0; i < 8; i++) {
+            createNewUserPassword += symbols.charAt(Math.floor(Math.random() * symbols.length));
+        }
+        let newHashPassword = crypto.pbkdf2Sync(createNewUserPassword, 'salt', 100000, 64, 'sha512').toString('hex');
+        user.hash = newHashPassword;
+        user.online = fn('NOW');
+        user.save();
+        resetPassword(email, createNewUserPassword);
+    } else {
+        return ({ response: { status: "error", info: "Cant find this email." } });
+    }
+}
+
+exports.emailStatusGET = async function (email) {
     if (email) {
-        let count = await users.count({ where: { email: email } })
+        let count = await userTable.count({ where: { email: email } })
         if (count) {
             return ({ response: { status: "error", info: "This email yet registration." } });
         } else {
@@ -69,11 +89,11 @@ exports.apiEmailStatusGET = async function (email) {
     }
 }
 
-exports.apiGetUserDataTokenGET = async function (token) {
-    let response = await users.findOne({ where: { token } });
-    if (response) {
-        let { id, email, number, firstname, lastname, createdAt } = response;
-        let stores = await store.findAll({ where: { admin: id } });
+exports.userDataGET = async function (token) {
+    let user = await userTable.findOne({ where: { token } });
+    if (user) {
+        let { id, email, number, firstname, lastname, createdAt } = user;
+        let stores = await storeTable.findAll({ where: { admin: id } });
         let storesFilter = [];
         stores.forEach(element => {
             storesFilter.push({
@@ -88,52 +108,53 @@ exports.apiGetUserDataTokenGET = async function (token) {
     return ({ response: { status: "error", info: "No valid token." } });
 }
 
-exports.apiUpdateDataTokenPUT = async function (token, body) {
-    let response = await users.findOne({ where: { token } });
-    if (response) {
+exports.updateUserPUT = async function (token, body) {
+    let user = await userTable.findOne({ where: { token } });
+    if (user) {
         if (body.password) {
             if (!RegExp(/(?=^.{9,}$)(?=.*[0-9])(?=.*[A-Z])(?=.*[a-z])(?=.*[^A-Za-z0-9])/).test(body.password)) {
                 return ({ response: { status: "error", info: "Bad password, please send correct password." } });
             }
-            response.hash = crypto.pbkdf2Sync(body.password, 'salt', 100000, 64, 'sha512').toString('hex');
-            response.save();
+            user.hash = crypto.pbkdf2Sync(body.password, 'salt', 100000, 64, 'sha512').toString('hex');
+            user.save();
         }
 
         if (body.number) {
             if (!RegExp(/^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/).test(body.number)) {
                 return ({ response: { status: "error", info: "Please send correct number." } });
             }
-            response.number = body.number.replace('+', '');
-            response.save();
+            user.number = body.number.replace('+', '');
+            user.save();
         }
 
         if (body.firstname) {
             if (body.firstname.length && body.firstname.length > 20) {
                 return ({ response: { status: "error", info: "Please send correct firstname." } });
             }
-            response.firstname = body.firstname;
-            response.save();
+            user.firstname = body.firstname;
+            user.save();
         }
 
         if (body.lastname) {
             if (body.lastname.length && body.lastname.length > 20) {
                 return ({ response: { status: "error", info: "Please send correct lastname." } });
             }
-            response.lastname = body.lastname;
-            response.save();
+            user.lastname = body.lastname;
+            user.online = fn('NOW');
+            user.save();
         }
-
         return ({ response: { status: "ok" } });
     }
     return ({ response: { status: "error", info: "No auth." } });
 }
 
-exports.emailActiveGet = async function (smail) {
+exports.emailActiveGET = async function (smail) {
     if (smail.length == 128) {
-        let request = await users.findOne({ where: { smail } });
-        if (request && request.dataValues.id > 0) {
-            request.smail = "";
-            request.save();
+        let user = await userTable.findOne({ where: { smail } });
+        if (user && user.dataValues.id > 0) {
+            user.smail = "";
+            user.online = fn('NOW');
+            user.save();
             return ({ response: { status: "ok" } });
         } else {
             return ({ response: { status: "error", info: "Cant find key." } });
@@ -144,7 +165,7 @@ exports.emailActiveGet = async function (smail) {
 }
 
 async function authInformation(object) {
-    auth.create({
+    authTable.create({
         user: object.user,
         double: object.double,
         platforma: object.platforma,

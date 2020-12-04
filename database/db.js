@@ -1,10 +1,10 @@
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize(
-    'eat', 'root', '', { host: 'localhost', dialect: 'mysql' }
+    'eat', 'root', 'toor', { host: 'localhost', dialect: 'mysql' }
 );
 
-const users = sequelize.define('users', {
+const userTable = sequelize.define('users', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -27,6 +27,9 @@ const users = sequelize.define('users', {
         type: Sequelize.STRING(20),
         allowNull: false
     },
+    online: {
+        type: Sequelize.DATE
+    },
     hash: {
         type: Sequelize.STRING(128),
         allowNull: false
@@ -45,7 +48,7 @@ const users = sequelize.define('users', {
     }
 });
 
-const auth = sequelize.define('auths', {
+const authTable = sequelize.define('auths', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -74,7 +77,7 @@ const auth = sequelize.define('auths', {
     }
 });
 
-const store = sequelize.define('stores', {
+const storeTable = sequelize.define('stores', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -103,7 +106,7 @@ const store = sequelize.define('stores', {
     }
 });
 
-const product = sequelize.define('products', {
+const productTable = sequelize.define('products', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -144,7 +147,7 @@ const product = sequelize.define('products', {
     },
 });
 
-const star = sequelize.define('stars', {
+const starTable = sequelize.define('stars', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -165,7 +168,7 @@ const star = sequelize.define('stars', {
     }
 });
 
-const comment = sequelize.define('comments', {
+const commentTable = sequelize.define('comments', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -186,10 +189,75 @@ const comment = sequelize.define('comments', {
     }
 });
 
+const cartTable = sequelize.define('carts', {
+    id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+    },
+    user: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    product: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    count: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    }
+});
+
+const chatTable = sequelize.define('chats', {
+    id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+    },
+    user1: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    user2: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    }
+});
+
+const messageTable = sequelize.define('messages', {
+    id: {
+        type: Sequelize.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false
+    },
+    content: {
+        type: Sequelize.STRING(256),
+        allowNull: false
+    },
+    sender: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    },
+    chatid: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    }
+});
+
 sequelize.authenticate().then(function (err) {
     console.log('Connection has been established successfully.');
 }).catch(function (err) {
     console.log('Unable to connect to the database:', err);
 });
 
-module.exports = { users, auth, store, product, comment, star }
+module.exports = {
+    userTable, authTable,
+    storeTable, productTable,
+    commentTable, starTable,
+    cartTable, chatTable,
+    messageTable
+}

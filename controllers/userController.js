@@ -3,9 +3,9 @@
 var utils = require('../utils/writer.js');
 var User = require('../service/userService');
 
-module.exports.apiCreateAccountPOST = function apiCreateAccountPOST(req, res, next) {
+module.exports.createAccountPOST = function createAccountPOST(req, res, next) {
     var body = req.swagger.params['body'].value;
-    User.apiCreateAccountPOST(body)
+    User.createAccountPOST(body)
         .then(function (response) {
             utils.writeJson(res, response);
         })
@@ -14,9 +14,9 @@ module.exports.apiCreateAccountPOST = function apiCreateAccountPOST(req, res, ne
         });
 };
 
-module.exports.apiEmailAuthPUT = function apiEmailAuthPUT(req, res, next) {
+module.exports.emailAuthPUT = function emailAuthPUT(req, res, next) {
     var body = req.swagger.params['body'].value;
-    User.apiEmailAuthPUT(body)
+    User.emailAuthPUT(body)
         .then(function (response) {
             utils.writeJson(res, response);
         })
@@ -25,9 +25,9 @@ module.exports.apiEmailAuthPUT = function apiEmailAuthPUT(req, res, next) {
         });
 };
 
-module.exports.apiEmailStatusGET = function apiEmailStatusGET(req, res, next) {
+module.exports.resetPasswordGET = function resetPasswordGET(req, res, next) {
     var email = req.swagger.params['email'].value;
-    User.apiEmailStatusGET(email)
+    User.resetPasswordGET(email)
         .then(function (response) {
             utils.writeJson(res, response);
         })
@@ -36,9 +36,20 @@ module.exports.apiEmailStatusGET = function apiEmailStatusGET(req, res, next) {
         });
 };
 
-module.exports.apiGetUserDataTokenGET = function apiGetUserDataTokenGET(req, res, next) {
+module.exports.emailStatusGET = function emailStatusGET(req, res, next) {
+    var email = req.swagger.params['email'].value;
+    User.emailStatusGET(email)
+        .then(function (response) {
+            utils.writeJson(res, response);
+        })
+        .catch(function (response) {
+            utils.writeJson(res, response);
+        });
+};
+
+module.exports.userDataGET = function userDataGET(req, res, next) {
     var token = req.swagger.params['token'].value;
-    User.apiGetUserDataTokenGET(token)
+    User.userDataGET(token)
         .then(function (response) {
             utils.writeJson(res, response);
         })
@@ -47,10 +58,10 @@ module.exports.apiGetUserDataTokenGET = function apiGetUserDataTokenGET(req, res
         });
 };
 
-module.exports.apiUpdateDataTokenPUT = function apiUpdateDataTokenPUT(req, res, next) {
+module.exports.updateUserPUT = function updateUserPUT(req, res, next) {
     var token = req.swagger.params['token'].value;
     var body = req.swagger.params['body'].value;
-    User.apiUpdateDataTokenPUT(token, body)
+    User.updateUserPUT(token, body)
         .then(function (response) {
             utils.writeJson(res, response);
         })
@@ -59,9 +70,9 @@ module.exports.apiUpdateDataTokenPUT = function apiUpdateDataTokenPUT(req, res, 
         });
 };
 
-module.exports.emailActiveGet = function emailActiveGet(req, res, next) {
+module.exports.emailActiveGET = function emailActiveGET(req, res, next) {
     var smail = req.swagger.params['smail'].value;
-    User.emailActiveGet(smail)
+    User.emailActiveGET(smail)
         .then(function (response) {
             utils.writeJson(res, response);
         })

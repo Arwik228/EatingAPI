@@ -1,16 +1,16 @@
 
-const { users, comment, product } = require('../database/db');
+const { userTable, commentTable, productTable } = require('../database/db');
 const { Op } = require("sequelize");
 
 exports.commentProductDELETE = async function (token, id) {
-    let response = await users.findOne({ where: { token } });
-    if (response) {
+    let user = await userTable.findOne({ where: { token } });
+    if (user) {
         if (isNaN(id)) {
             return ({ response: { status: "error", info: "Please send correct id." } });
         }
-        let request = await comment.findOne({ where: { id: parseInt(id) } });
-        if (request) {
-            request.destroy();
+        let comment = await commentTable.findOne({ where: { id } });
+        if (comment) {
+            comment.destroy();
             return ({ response: { status: "ok", info: "Comment is delete." } });
         } else {
             return ({ response: { status: "error", info: "This comment cant find." } });
@@ -19,43 +19,50 @@ exports.commentProductDELETE = async function (token, id) {
     return ({ response: { status: "error", info: "No auth." } });
 }
 
-exports.commentProductGET = async function (token, startId, amount, product) {
-    let response = await users.findOne({ where: { token } });
-    if (response) {
-        if (isNaN(product)) {
-            return ({ response: { status: "error", info: "Please send correct product." } });
-        }
-        data = await comment.findAll({
-            where: {
-                id: {
-                    [Op.between]: [parseInt(startId), parseInt(startId) + parseInt(amount) - 1]
-                },
-                product: parseInt(product)
-            }
-        });
-        if (data) {
-            return ({ response: { status: "ok", data } })
-        }
+exports.commentProductGET = async function (startId, amount, product) {
+    if (!startId || !amount || !product) {
+        return ({ response: { status: "error", info: "Please send all value." } });
     }
-    return ({ response: { status: "error", info: "No auth." } });
+    if (isNaN(startId) || isNaN(amount) || isNaN(product)) {
+        return ({ response: { status: "error", info: "Please send correct data." } });
+    }
+    comments = await commentTable.findAll({
+        where: {
+            id: {
+                [Op.between]: [startId, startId + amount - 1]
+            },
+            product: product
+        }
+    });
+    let filterData = [];
+    comments.forEach(elem => {
+        filterData.push(elem.dataValues)
+    });
+    if (comments) {
+        return ({ response: { status: "ok", filterData } })
+    } else {
+        return ({ response: { status: "error", info: "Disastrous request." } })
+    }
 }
 
 exports.createCommentPOST = async function (body, token) {
-    let response = await users.findOne({ where: { token } });
-    if (response) {
-        if (body.content && body.content > 256) {
+    let user = await userTable.findOne({ where: { token } });
+    if (user) {
+        if (body.content && body.content.length > 256) {
             return ({ response: { status: "error", info: "Please send correct content." } });
         }
-        if (await product.count({ where: { id: body.product } }) == 0) {
+        if (await productTable.count({ where: { id: body.product } }) == 0) {
             return ({ response: { status: "error", info: "This product cant find." } });
         }
-        let request = await comment.create({
+        let comment = await commentTable.create({
             product: body.product,
             content: body.content,
-            author: response.id
+            author: user.id
         });
-        if (request) {
+        if (comment) {
             return ({ response: { status: "ok", info: "Comment is create." } });
+        } else {
+            return ({ response: { status: "error", info: "Disastrous request." } })
         }
     }
     return ({ response: { status: "error", info: "No auth." } });
