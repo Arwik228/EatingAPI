@@ -138,7 +138,7 @@ async function verification(token, double, confirm) {
     if (token.length === 128 && double.length === 10) {
         let request = await userTable.findOne({ where: { token, double } });
         if (confirm) {
-            return request.dataValues.smail ? false : request.dataValues;
+            return request.dataValues.smail?request.dataValues:false;
         } else {
             return request.dataValues;
         }
