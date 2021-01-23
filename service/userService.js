@@ -52,7 +52,7 @@ exports.emailAuthPUT = async function (body) {
             thisAccountIsExist.save();
             return ({ response: { status: "ok", info: "You auth.", access: { token, double } } });
         } else {
-            return ({ response: { status: "ok", info: "Bad password." } });
+            return ({ response: { status: "error", info: "Bad password." } });
         }
     }
     return ({ response: { status: "error", info: "No valid data." } });
