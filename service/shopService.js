@@ -83,7 +83,7 @@ exports.updateShopPOST = async function (idShop, token, image = false, nameShop 
         if (nameShop.length && nameShop.length > 30) {
             return ({ response: { status: "error", info: "Please send correct name." } });
         }
-        if (await storeTable.count({ where: { name: nameShop } }) > 0) {
+        if (nameShop !== false && await storeTable.count({ where: { name: nameShop } }) > 0) {
             return ({ response: { status: "error", info: "This name shops is exist." } });
         }
         if (information.length && information.length > 512) {
