@@ -124,14 +124,25 @@ exports.listProductsGET = async function (startId = 1, amount = 0, searchWord = 
     amount = (amount > 20 ? 20 : amount);
     let listProduct = "";
     if (searchWord) {
-        listProduct = await productTable.findAll({
-            where: {
-                id: {
-                    [Op.between]: [startId, startId + amount - 1]
-                },
-                name: { [Op.like]: `%${searchWord}%` }
-            }
-        });
+        if (isNaN(searchWord)) {
+            listProduct = await productTable.findAll({
+                where: {
+                    id: {
+                        [Op.between]: [startId, startId + amount - 1]
+                    },
+                    name: { [Op.like]: `%${searchWord}%` }
+                }
+            });
+        } else {
+            listProduct = await productTable.findAll({
+                where: {
+                    id: {
+                        [Op.between]: [startId, startId + amount - 1]
+                    },
+                    store: searchWord
+                }
+            });
+        }
     } else {
         listProduct = await product.findAll({ where: { id: { [Op.between]: [startId, startId + amount - 1] } } });
     }
